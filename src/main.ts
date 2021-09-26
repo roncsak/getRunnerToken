@@ -16,6 +16,8 @@ async function run(): Promise<void> {
 
   // }
   core.setOutput('token', 'sometoken')
+  console.log(`${owner}, ${repo}`)
+  console.log(JSON.stringify(data, null, 2))
   console.log('The token is valid for: hh:mm')
 }
 
