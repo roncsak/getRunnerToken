@@ -8,8 +8,12 @@ const scope: string = core.getInput('scope', {required: true})
 const octokit = github.getOctokit(token)
 
 async function run(): Promise<void> {
-  const registrationToken = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
-  console.log(registrationToken)
+  // try {
+  const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
+  console.log(JSON.stringify(data, null, 2))
+  // } catch() {
+
+  // }
   core.setOutput('token', 'sometoken')
   console.log('The token is valid for: hh:mm')
 }
