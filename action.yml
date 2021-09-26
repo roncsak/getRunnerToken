@@ -1,0 +1,22 @@
+name: 'Self-hosted runner registration token provider'
+description: 'Get GitHub Action registration token for self-hosted runners'
+author: 'roncsak'
+branding:
+  icon: chevrons-right
+  color: purple
+inputs:
+  scope:
+    required: true
+    description: 'The scope of the registration token'
+    default: 'repository'
+  token:
+    required: true
+    description: 'GitHub or PAT token'
+    default: ${{ github.token }}
+outputs:
+  token:
+    description: "Registration token for self-hosted runner"
+
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
