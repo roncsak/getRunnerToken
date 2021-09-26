@@ -9,6 +9,7 @@ const octokit = github.getOctokit(token)
 
 async function run(): Promise<void> {
   // try {
+  console.log(`${owner}, ${repo}`)
   const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
   console.log(JSON.stringify(data, null, 2))
   // } catch() {
