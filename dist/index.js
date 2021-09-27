@@ -45,32 +45,21 @@ const octokit = github.getOctokit(token, {
     log: console
 });
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        const { headers } = yield octokit.request('HEAD /');
+        const scopes = (_a = headers['x-oauth-scopes']) === null || _a === void 0 ? void 0 : _a.split(', ');
+        console.log(scopes);
         if (!(0, utils_1.scopeIsValid)(scope)) {
             core.setFailed('Invalid scope!');
         }
         const response = yield getRegistrationToken();
-        // try {
-        //   if (scope == Scope.ORG) {
-        //     const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
-        //     octokit.log.debug(JSON.stringify(data, null, 2))
-        //   } else if (scope == Scope.REPO) {
-        //     const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
-        //     octokit.log.debug(JSON.stringify(data, null, 2))
-        //   } else {
-        //     core.setFailed('Invalid scope!')
-        //   }
-        // } catch (error) {
-        //   octokit.log.debug(`${error}`)
-        // }
         core.setOutput('token', response.token);
         core.setOutput('expires_at', response.expires_at);
-        octokit.log.debug('The token is valid for: hh:mm');
     });
 }
 function getRegistrationToken() {
     return __awaiter(this, void 0, void 0, function* () {
-        // const data: RegistrationResponse = { token: "", expires_at: "" }
         try {
             const { data } = scope === utils_1.Scope.ORG
                 ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
@@ -81,19 +70,6 @@ function getRegistrationToken() {
             core.setFailed('Invalid scope!');
             return { token: '', expires_at: '' };
         }
-        // switch (scope) {
-        //   case Scope.ORG:
-        //     const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
-        //     // data.token = response.t
-        //     return data
-        //   case Scope.REPO:
-        //     const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
-        //     return data
-        //   default:
-        //     core.setFailed("Invalid scope!")
-        //     break;
-        // }
-        // return data
     });
 }
 run();
@@ -116,16 +92,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.scopeIsValid = exports.getOwnerAndRepo = exports.escapeSpecialHtmlCharacters = exports.Scope = void 0;
+exports.scopeIsValid = exports.getOwnerAndRepo = exports.Scope = void 0;
 var Scope;
 (function (Scope) {
     Scope["ORG"] = "organization";
     Scope["REPO"] = "repository";
 })(Scope = exports.Scope || (exports.Scope = {}));
-function escapeSpecialHtmlCharacters(str) {
-    return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-exports.escapeSpecialHtmlCharacters = escapeSpecialHtmlCharacters;
 function getOwnerAndRepo(str) {
     const [owner, repo] = str.split('/', 2);
     return [owner, repo];
