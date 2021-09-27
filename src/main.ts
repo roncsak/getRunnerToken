@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {getOwnerAndRepo} from './tools/utils'
 import {Scope} from './tools/utils'
+import {RegistrationResponse} from './types/main'
 
 const [owner, repo] = getOwnerAndRepo(process.env.GITHUB_REPOSITORY as string)
 const token: string = core.getInput('token', {required: true})
@@ -11,22 +12,51 @@ const octokit = github.getOctokit(token, {
 })
 
 async function run(): Promise<void> {
-  try {
-    if (scope == Scope.ORG) {
-      const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
-      octokit.log.debug(JSON.stringify(data, null, 2))
-    } else if (scope == Scope.REPO) {
-      const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
-      octokit.log.debug(JSON.stringify(data, null, 2))
-    } else {
-      core.setFailed('Invalid scope!')
-    }
-  } catch (error) {
-    octokit.log.debug(`${error}`)
-  }
-  core.setOutput('token', 'sometoken')
-  octokit.log.debug(`${owner}, ${repo}`)
+  const response: RegistrationResponse = await getRegistrationToken()
+  // try {
+  //   if (scope == Scope.ORG) {
+  //     const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
+  //     octokit.log.debug(JSON.stringify(data, null, 2))
+  //   } else if (scope == Scope.REPO) {
+  //     const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
+  //     octokit.log.debug(JSON.stringify(data, null, 2))
+  //   } else {
+  //     core.setFailed('Invalid scope!')
+  //   }
+  // } catch (error) {
+  //   octokit.log.debug(`${error}`)
+  // }
+  core.setOutput('token', response.token)
   octokit.log.debug('The token is valid for: hh:mm')
+}
+
+async function getRegistrationToken(): Promise<RegistrationResponse> {
+  // const data: RegistrationResponse = { token: "", expires_at: "" }
+  try {
+    const {data} =
+      scope === Scope.ORG
+        ? await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
+        : await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
+    return data
+  } catch (error) {
+    core.setFailed('Invalid scope!')
+    return {token: '', expires_at: ''}
+  }
+
+  // switch (scope) {
+
+  //   case Scope.ORG:
+  //     const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
+  //     // data.token = response.t
+  //     return data
+  //   case Scope.REPO:
+  //     const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
+  //     return data
+  //   default:
+  //     core.setFailed("Invalid scope!")
+  //     break;
+  // }
+  // return data
 }
 
 run()
