@@ -52,7 +52,7 @@ function run() {
                 const { data } = yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner });
                 octokit.log.debug(JSON.stringify(data, null, 2));
             }
-            else if (scope == utils_2.Scope.ORG) {
+            else if (scope == utils_2.Scope.REPO) {
                 const { data } = yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
                 octokit.log.debug(JSON.stringify(data, null, 2));
             }

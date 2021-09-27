@@ -15,7 +15,7 @@ async function run(): Promise<void> {
     if (scope == Scope.ORG) {
       const {data} = await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
       octokit.log.debug(JSON.stringify(data, null, 2))
-    } else if (scope == Scope.ORG) {
+    } else if (scope == Scope.REPO) {
       const {data} = await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
       octokit.log.debug(JSON.stringify(data, null, 2))
     } else {
