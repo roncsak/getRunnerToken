@@ -41,7 +41,9 @@ const utils_1 = __nccwpck_require__(5710);
 const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
 const token = core.getInput('token', { required: true });
 const scope = core.getInput('scope', { required: true });
-const octokit = github.getOctokit(token);
+const octokit = github.getOctokit(token, {
+    log: console
+});
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -52,7 +54,7 @@ function run() {
         catch (error) {
             octokit.log.debug(`${error}`);
         }
-        core.setOutput('token', 'sometoken');
+        core.setOutput('token2', 'sometoken');
         octokit.log.debug(`${owner}, ${repo}`);
         octokit.log.debug('The token is valid for: hh:mm');
     });

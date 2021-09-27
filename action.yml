@@ -14,7 +14,7 @@ inputs:
     description: 'GitHub or PAT token'
     default: ${{ github.token }}
 outputs:
-  token:
+  token2:
     description: "Registration token for self-hosted runner"
 
 runs:
