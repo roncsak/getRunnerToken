@@ -1,3 +1,8 @@
+export enum Scope {
+  ORG = 'organization',
+  REPO = 'repository'
+}
+
 export function escapeSpecialHtmlCharacters(str: string): string {
   return str.replace(/</g, '&lt;').replace(/>/g, '&gt;')
 }

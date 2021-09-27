@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(5710);
+const utils_2 = __nccwpck_require__(5710);
 const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
 const token = core.getInput('token', { required: true });
 const scope = core.getInput('scope', { required: true });
@@ -47,9 +48,17 @@ const octokit = github.getOctokit(token, {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            octokit.log.debug(`${owner}, ${repo}`);
-            const { data } = yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
-            octokit.log.debug(JSON.stringify(data, null, 2));
+            if (scope == utils_2.Scope.ORG) {
+                const { data } = yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner });
+                octokit.log.debug(JSON.stringify(data, null, 2));
+            }
+            else if (scope == utils_2.Scope.ORG) {
+                const { data } = yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
+                octokit.log.debug(JSON.stringify(data, null, 2));
+            }
+            else {
+                core.setFailed('Invalid scope!');
+            }
         }
         catch (error) {
             octokit.log.debug(`${error}`);
@@ -70,7 +79,12 @@ run();
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOwnerAndRepo = exports.escapeSpecialHtmlCharacters = void 0;
+exports.getOwnerAndRepo = exports.escapeSpecialHtmlCharacters = exports.Scope = void 0;
+var Scope;
+(function (Scope) {
+    Scope["ORG"] = "organization";
+    Scope["REPO"] = "repository";
+})(Scope = exports.Scope || (exports.Scope = {}));
 function escapeSpecialHtmlCharacters(str) {
     return str.replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
