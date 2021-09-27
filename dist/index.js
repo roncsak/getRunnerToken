@@ -44,14 +44,17 @@ const scope = core.getInput('scope', { required: true });
 const octokit = github.getOctokit(token);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        // try {
-        console.log(`${owner}, ${repo}`);
-        const { data } = yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
-        console.log(JSON.stringify(data, null, 2));
-        // } catch() {
-        // }
+        try {
+            octokit.log.debug(`${owner}, ${repo}`);
+            const { data } = yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
+            octokit.log.debug(JSON.stringify(data, null, 2));
+        }
+        catch (error) {
+            octokit.log.debug(`${error}`);
+        }
         core.setOutput('token', 'sometoken');
-        console.log('The token is valid for: hh:mm');
+        octokit.log.debug(`${owner}, ${repo}`);
+        octokit.log.debug('The token is valid for: hh:mm');
     });
 }
 run();
