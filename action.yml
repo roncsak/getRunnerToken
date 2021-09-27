@@ -13,7 +13,7 @@ inputs:
     required: true
     description: 'GitHub or PAT token'
 outputs:
-  token2:
+  token:
     description: "Registration token for self-hosted runner"
 
 runs:

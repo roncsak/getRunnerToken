@@ -24,7 +24,7 @@ async function run(): Promise<void> {
   } catch (error) {
     octokit.log.debug(`${error}`)
   }
-  core.setOutput('token2', 'sometoken')
+  core.setOutput('token', 'sometoken')
   octokit.log.debug(`${owner}, ${repo}`)
   octokit.log.debug('The token is valid for: hh:mm')
 }

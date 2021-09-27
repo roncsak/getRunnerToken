@@ -20,6 +20,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./
+        id: getToken
         with:
           token: ${{ secrets.PAT }}
-          scope: "organization"
+          # scope: "organization"
+      - run: |
+          echo "The token is ${{ steps.getToken.outputs.token }}"
