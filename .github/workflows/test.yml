@@ -25,4 +25,4 @@ jobs:
           token: ${{ secrets.PAT }}
           # scope: "organization"
       - run: |
-          echo "The token is ${{ steps.getToken.outputs.token }}"
+          echo "The token is: ${{ steps.getToken.outputs.token }} , expires at ${{ steps.getToken.outputs.expires_at }}"

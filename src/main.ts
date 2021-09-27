@@ -1,7 +1,6 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import {getOwnerAndRepo} from './tools/utils'
-import {Scope} from './tools/utils'
+import {getOwnerAndRepo, scopeIsValid, Scope} from './tools/utils'
 import {RegistrationResponse} from './types/main'
 
 const [owner, repo] = getOwnerAndRepo(process.env.GITHUB_REPOSITORY as string)
@@ -12,6 +11,9 @@ const octokit = github.getOctokit(token, {
 })
 
 async function run(): Promise<void> {
+  if (!scopeIsValid(scope)) {
+    core.setFailed('Invalid scope!')
+  }
   const response: RegistrationResponse = await getRegistrationToken()
   // try {
   //   if (scope == Scope.ORG) {
@@ -27,6 +29,7 @@ async function run(): Promise<void> {
   //   octokit.log.debug(`${error}`)
   // }
   core.setOutput('token', response.token)
+  core.setOutput('expires_at', response.expires_at)
   octokit.log.debug('The token is valid for: hh:mm')
 }
 

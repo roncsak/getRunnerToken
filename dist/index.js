@@ -38,7 +38,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(5710);
-const utils_2 = __nccwpck_require__(5710);
 const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
 const token = core.getInput('token', { required: true });
 const scope = core.getInput('scope', { required: true });
@@ -47,6 +46,9 @@ const octokit = github.getOctokit(token, {
 });
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        if (!(0, utils_1.scopeIsValid)(scope)) {
+            core.setFailed('Invalid scope!');
+        }
         const response = yield getRegistrationToken();
         // try {
         //   if (scope == Scope.ORG) {
@@ -62,6 +64,7 @@ function run() {
         //   octokit.log.debug(`${error}`)
         // }
         core.setOutput('token', response.token);
+        core.setOutput('expires_at', response.expires_at);
         octokit.log.debug('The token is valid for: hh:mm');
     });
 }
@@ -69,12 +72,14 @@ function getRegistrationToken() {
     return __awaiter(this, void 0, void 0, function* () {
         // const data: RegistrationResponse = { token: "", expires_at: "" }
         try {
-            const { data } = (scope === utils_2.Scope.ORG) ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner }) : yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
+            const { data } = scope === utils_1.Scope.ORG
+                ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
+                : yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
             return data;
         }
         catch (error) {
             core.setFailed('Invalid scope!');
-            return { token: "", expires_at: "" };
+            return { token: '', expires_at: '' };
         }
         // switch (scope) {
         //   case Scope.ORG:
@@ -97,12 +102,21 @@ run();
 /***/ }),
 
 /***/ 5710:
-/***/ ((__unused_webpack_module, exports) => {
+/***/ (function(__unused_webpack_module, exports) {
 
 "use strict";
 
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOwnerAndRepo = exports.escapeSpecialHtmlCharacters = exports.Scope = void 0;
+exports.scopeIsValid = exports.getOwnerAndRepo = exports.escapeSpecialHtmlCharacters = exports.Scope = void 0;
 var Scope;
 (function (Scope) {
     Scope["ORG"] = "organization";
@@ -117,6 +131,12 @@ function getOwnerAndRepo(str) {
     return [owner, repo];
 }
 exports.getOwnerAndRepo = getOwnerAndRepo;
+function scopeIsValid(scope) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return Object.values(Scope).includes(scope);
+    });
+}
+exports.scopeIsValid = scopeIsValid;
 
 
 /***/ }),
