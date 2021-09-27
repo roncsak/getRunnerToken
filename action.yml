@@ -12,7 +12,6 @@ inputs:
   token:
     required: true
     description: 'GitHub or PAT token'
-    default: ${{ secrets.PAT }}
 outputs:
   token2:
     description: "Registration token for self-hosted runner"
