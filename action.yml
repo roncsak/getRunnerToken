@@ -8,7 +8,7 @@ inputs:
   scope:
     required: true
     description: 'The scope of the registration token'
-    default: 'repository'
+    default: 'automatic'
   token:
     required: true
     description: 'GitHub or PAT token'

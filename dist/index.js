@@ -37,7 +37,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const octokit_1 = __nccwpck_require__(9558);
 const utils_1 = __nccwpck_require__(5710);
+var oAuthScopes;
 const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
 const token = core.getInput('token', { required: true });
 const scope = core.getInput('scope', { required: true });
@@ -45,11 +47,8 @@ const octokit = github.getOctokit(token, {
     log: console
 });
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const { headers } = yield octokit.request('HEAD /');
-        const scopes = (_a = headers['x-oauth-scopes']) === null || _a === void 0 ? void 0 : _a.split(', ');
-        console.log(scopes);
+        yield getOAuthScopes();
         if (!(0, utils_1.scopeIsValid)(scope)) {
             core.setFailed('Invalid scope!');
         }
@@ -58,10 +57,23 @@ function run() {
         core.setOutput('expires_at', response.expires_at);
     });
 }
+function getOAuthScopes() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        let scopes;
+        const { headers } = yield octokit.request('HEAD /');
+        scopes = (_a = headers['x-oauth-scopes']) === null || _a === void 0 ? void 0 : _a.split(', ');
+        if (scopes !== undefined) {
+            oAuthScopes = scopes;
+        }
+    });
+}
 function getRegistrationToken() {
     return __awaiter(this, void 0, void 0, function* () {
+        yield getOAuthScopes();
+        const calculatedScope = (0, octokit_1.returnCalculatedScope)(scope);
         try {
-            const { data } = scope === utils_1.Scope.ORG
+            const { data } = calculatedScope === utils_1.Scope.ORG
                 ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
                 : yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
             return data;
@@ -77,11 +89,98 @@ run();
 
 /***/ }),
 
-/***/ 5710:
-/***/ (function(__unused_webpack_module, exports) {
+/***/ 9558:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
 
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.returnCalculatedScope = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const utils_1 = __nccwpck_require__(5710);
+let oAuthScopes;
+function returnCalculatedScope(scope) {
+    switch (scope) {
+        case 'automatic':
+            if ((0, utils_1.oAuthHasOrgScope)(oAuthScopes)) {
+                return utils_1.Scope.ORG;
+            }
+            else if ((0, utils_1.oAuthHasRepoScope)(oAuthScopes)) {
+                return utils_1.Scope.REPO;
+            }
+            else {
+                core.setFailed('Invalid scope!');
+                return '';
+            }
+        case utils_1.Scope.ORG:
+            if ((0, utils_1.oAuthHasOrgScope)(oAuthScopes)) {
+                return utils_1.Scope.ORG;
+            }
+            else {
+                core.setFailed('Invalid scope! PAT must have the following scope turned on: admin:org');
+                return '';
+            }
+        case utils_1.Scope.REPO:
+            if ((0, utils_1.oAuthHasRepoScope)(oAuthScopes)) {
+                return utils_1.Scope.REPO;
+            }
+            else {
+                core.setFailed('Invalid scope! PAT must have the following scope turned on: repo');
+                return '';
+            }
+        default:
+            core.setFailed('Invalid scope!');
+            return '';
+    }
+}
+exports.returnCalculatedScope = returnCalculatedScope;
+
+
+/***/ }),
+
+/***/ 5710:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -92,12 +191,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.scopeIsValid = exports.getOwnerAndRepo = exports.Scope = void 0;
+exports.someFn = exports.scopeIsValid = exports.getOwnerAndRepo = exports.oAuthHasOrgScope = exports.oAuthHasRepoScope = exports.Scope = void 0;
+const core = __importStar(__nccwpck_require__(2186));
 var Scope;
 (function (Scope) {
     Scope["ORG"] = "organization";
     Scope["REPO"] = "repository";
+    Scope["AUTO"] = "automatic";
 })(Scope = exports.Scope || (exports.Scope = {}));
+var OAuthScope;
+(function (OAuthScope) {
+    OAuthScope["ADMINORG"] = "admin:org";
+    OAuthScope["REPO"] = "repo";
+})(OAuthScope || (OAuthScope = {}));
+// let oAuthScopes: string[]
+function oAuthHasRepoScope(scopes) {
+    return scopes.includes(OAuthScope.REPO);
+}
+exports.oAuthHasRepoScope = oAuthHasRepoScope;
+function oAuthHasOrgScope(scopes) {
+    return scopes.includes(OAuthScope.ADMINORG);
+}
+exports.oAuthHasOrgScope = oAuthHasOrgScope;
 function getOwnerAndRepo(str) {
     const [owner, repo] = str.split('/', 2);
     return [owner, repo];
@@ -109,6 +224,11 @@ function scopeIsValid(scope) {
     });
 }
 exports.scopeIsValid = scopeIsValid;
+function someFn() {
+    core.setFailed('invalid scope');
+    return '';
+}
+exports.someFn = someFn;
 
 
 /***/ }),

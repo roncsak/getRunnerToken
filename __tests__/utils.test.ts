@@ -1,4 +1,25 @@
-import {getOwnerAndRepo, scopeIsValid, Scope} from '../src/tools/utils'
+// import * as core from '@actions/core'
+import {
+  getOwnerAndRepo,
+  scopeIsValid,
+  oAuthHasRepoScope,
+  oAuthHasOrgScope
+} from '../src/tools/utils'
+
+// test.each([
+//   {testString: 'organization', expected: true},
+//   {testString: 'repository', expected: true},
+//   {testString: 'automatic', expected: true},
+//   {testString: 'Repository', expected: false},
+//   {testString: '', expected: false}
+// ])('testFn()', ({testString, expected}) => {
+//   jest.spyOn(core, 'setFailed').mockImplementation(() => {
+//     console.log('core setFailed were called')
+//   })
+
+//   const isValid = someFn()
+//   expect(isValid).toBe(expected)
+// })
 
 test('getOwnerAndRepo(octokit/core)', async () => {
   const testString = 'octokit/core'
@@ -8,30 +29,33 @@ test('getOwnerAndRepo(octokit/core)', async () => {
   expect(repo).toBe('core')
 })
 
-test('scopeIsValid(organization)', async () => {
-  const testString = 'organization'
+test.each([
+  {testString: 'organization', expected: true},
+  {testString: 'repository', expected: true},
+  {testString: 'automatic', expected: true},
+  {testString: 'Repository', expected: false},
+  {testString: '', expected: false}
+])('scopeIsValid($testString)', async ({testString, expected}) => {
   const isValid = await scopeIsValid(testString)
-
-  expect(isValid).toBe(true)
+  expect(isValid).toBe(expected)
 })
 
-test('scopeIsValid(repository)', async () => {
-  const testString = 'repository'
-  const isValid = await scopeIsValid(testString)
-
-  expect(isValid).toBe(true)
+test.each([
+  {testString: ['admin:org', 'repo'], expected: true},
+  {testString: ['repo'], expected: true},
+  {testString: ['admin:org'], expected: false},
+  {testString: [], expected: false}
+])('oAuthHasRepoScope($testString)', ({testString, expected}) => {
+  const isValid = oAuthHasRepoScope(testString)
+  expect(isValid).toBe(expected)
 })
 
-test('scopeIsValid(Repository)', async () => {
-  const testString = 'Repository'
-  const isValid = await scopeIsValid(testString)
-
-  expect(isValid).toBe(false)
-})
-
-test('scopeIsValid()', async () => {
-  const testString = ''
-  const isValid = await scopeIsValid(testString)
-
-  expect(isValid).toBe(false)
+test.each([
+  {testString: ['admin:org', 'repo'], expected: true},
+  {testString: ['repo'], expected: false},
+  {testString: ['admin:org'], expected: true},
+  {testString: [], expected: false}
+])('oAuthHasOrgScope($testString)', ({testString, expected}) => {
+  const isValid = oAuthHasOrgScope(testString)
+  expect(isValid).toBe(expected)
 })
