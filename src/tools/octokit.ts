@@ -1,36 +1,63 @@
 import * as core from '@actions/core'
-import {Scope, oAuthHasOrgScope, oAuthHasRepoScope} from './utils'
+import * as github from '@actions/github'
+import {ScopeInput, oAuthHasOrgScope, oAuthHasRepoScope, scopeInputIsValid} from './utils'
+import {RegistrationResponse} from '../types/main'
 
-// let oAuthScopes: string[]
+let oAuthScopes: string[]
+const tokenInput: string = core.getInput('token', {required: true})
+const scopeInput: string = core.getInput('scope', {required: true})
+const octokit = github.getOctokit(tokenInput, {
+  log: console
+})
 
-export function returnCalculatedScope(scope: string, oAuthScopes: string[]): string {
-  switch (scope) {
-    case 'automatic':
-      if (oAuthHasOrgScope(oAuthScopes)) {
-        return Scope.ORG
-      } else if (oAuthHasRepoScope(oAuthScopes)) {
-        return Scope.REPO
-      } else {
-        core.setFailed(`Invalid scope ${scope}! err3`)
-        return ''
-      }
-    case Scope.ORG:
-      if (oAuthHasOrgScope(oAuthScopes)) {
-        return Scope.ORG
-      } else {
-        core.setFailed('Invalid scope! PAT must have the following scope turned on: admin:org')
-        return ''
-      }
+export async function getRegistrationToken(
+  owner: string,
+  repo: string
+): Promise<RegistrationResponse> {
+  oAuthScopes = await getOAuthScopes()
+  const isOrgExists = await isOrganizationExists(repo)
+  const calculatedScope = returnCalculatedScope(scopeInput, oAuthScopes, isOrgExists)
+  try {
+    const {data} =
+      calculatedScope === ScopeInput.ORG
+        ? await octokit.rest.actions.createRegistrationTokenForOrg({org: owner})
+        : await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
+    return data
+  } catch (error) {
+    core.setFailed(`${error} err2`)
+    return {token: '', expires_at: ''}
+  }
+}
 
-    case Scope.REPO:
-      if (oAuthHasRepoScope(oAuthScopes)) {
-        return Scope.REPO
-      } else {
-        core.setFailed('Invalid scope! PAT must have the following scope turned on: repo')
-        return ''
-      }
-    default:
-      core.setFailed(`Invalid scope ${scope}! err4`)
-      return ''
+async function getOAuthScopes(): Promise<string[]> {
+  const {headers} = await octokit.request('HEAD /')
+  return headers['x-oauth-scopes']?.split(', ') ?? []
+}
+
+async function isOrganizationExists(org: string): Promise<boolean> {
+  try {
+    await octokit.rest.orgs.get({org})
+    return true
+  } catch (error) {
+    return false
+  }
+}
+
+export function returnCalculatedScope(
+  scope: string,
+  tokenScopes: string[],
+  isOrganization: boolean
+): string {
+  if (!scopeInputIsValid(scope)) {
+    core.setFailed(`Invalid scope (${scope}) err1!`)
+    return ''
+  }
+  if (isOrganization && oAuthHasOrgScope(tokenScopes) && scope !== ScopeInput.REPO) {
+    return ScopeInput.ORG
+  } else if (oAuthHasRepoScope(tokenScopes) && scope !== ScopeInput.ORG) {
+    return ScopeInput.REPO
+  } else {
+    core.setFailed(`Invalid scope ${scope}! err2`)
+    return ''
   }
 }

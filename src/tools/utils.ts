@@ -1,20 +1,12 @@
-export enum Scope {
-  ORG = 'organization',
-  REPO = 'repository',
-  AUTO = 'automatic'
-}
-
 enum OAuthScope {
   ADMINORG = 'admin:org',
   REPO = 'repo'
 }
 
-export function oAuthHasRepoScope(scopes: string[]): boolean {
-  return scopes.includes(OAuthScope.REPO)
-}
-
-export function oAuthHasOrgScope(scopes: string[]): boolean {
-  return scopes.includes(OAuthScope.ADMINORG)
+export enum ScopeInput {
+  ORG = 'organization',
+  REPO = 'repository',
+  AUTO = 'automatic'
 }
 
 export function getOwnerAndRepo(str: string): [string, string] {
@@ -22,6 +14,14 @@ export function getOwnerAndRepo(str: string): [string, string] {
   return [owner, repo]
 }
 
-export async function scopeIsValid(scope: string): Promise<boolean> {
-  return Object.values(Scope).includes(scope as Scope)
+export function oAuthHasOrgScope(scopes: string[]): boolean {
+  return scopes.includes(OAuthScope.ADMINORG)
+}
+
+export function oAuthHasRepoScope(scopes: string[]): boolean {
+  return scopes.includes(OAuthScope.REPO)
+}
+
+export function scopeInputIsValid(scope: string): boolean {
+  return Object.values(ScopeInput).includes(scope as ScopeInput)
 }

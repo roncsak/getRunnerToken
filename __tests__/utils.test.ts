@@ -1,7 +1,7 @@
 // import * as core from '@actions/core'
 import {
   getOwnerAndRepo,
-  scopeIsValid,
+  scopeInputIsValid,
   oAuthHasRepoScope,
   oAuthHasOrgScope
 } from '../src/tools/utils'
@@ -36,7 +36,7 @@ test.each([
   {testString: 'Repository', expected: false},
   {testString: '', expected: false}
 ])('scopeIsValid($testString)', async ({testString, expected}) => {
-  const isValid = await scopeIsValid(testString)
+  const isValid = await scopeInputIsValid(testString)
   expect(isValid).toBe(expected)
 })
 

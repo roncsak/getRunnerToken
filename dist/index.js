@@ -36,53 +36,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
 const octokit_1 = __nccwpck_require__(9558);
 const utils_1 = __nccwpck_require__(5710);
-var oAuthScopes;
-const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
-const token = core.getInput('token', { required: true });
-const scope = core.getInput('scope', { required: true });
-const octokit = github.getOctokit(token, {
-    log: console
-});
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield getOAuthScopes();
-        if (!(0, utils_1.scopeIsValid)(scope)) {
-            core.setFailed(`Invalid scope (${scope}) err1!`);
-        }
-        const response = yield getRegistrationToken();
+        const [owner, repo] = (0, utils_1.getOwnerAndRepo)(process.env.GITHUB_REPOSITORY);
+        const response = yield (0, octokit_1.getRegistrationToken)(owner, repo);
         core.setOutput('token', response.token);
         core.setOutput('expires_at', response.expires_at);
-    });
-}
-function getOAuthScopes() {
-    var _a;
-    return __awaiter(this, void 0, void 0, function* () {
-        let scopes;
-        const { headers } = yield octokit.request('HEAD /');
-        scopes = (_a = headers['x-oauth-scopes']) === null || _a === void 0 ? void 0 : _a.split(', ');
-        if (scopes !== undefined) {
-            oAuthScopes = scopes;
-        }
-    });
-}
-function getRegistrationToken() {
-    return __awaiter(this, void 0, void 0, function* () {
-        yield getOAuthScopes();
-        const calculatedScope = (0, octokit_1.returnCalculatedScope)(scope, oAuthScopes);
-        octokit.log.debug(`Calculated scope is: ${calculatedScope}`);
-        try {
-            const { data } = calculatedScope === utils_1.Scope.ORG
-                ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
-                : yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
-            return data;
-        }
-        catch (error) {
-            core.setFailed(`${error} err2`);
-            return { token: '', expires_at: '' };
-        }
     });
 }
 run();
@@ -114,55 +75,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.returnCalculatedScope = void 0;
-const core = __importStar(__nccwpck_require__(2186));
-const utils_1 = __nccwpck_require__(5710);
-// let oAuthScopes: string[]
-function returnCalculatedScope(scope, oAuthScopes) {
-    switch (scope) {
-        case 'automatic':
-            if ((0, utils_1.oAuthHasOrgScope)(oAuthScopes)) {
-                return utils_1.Scope.ORG;
-            }
-            else if ((0, utils_1.oAuthHasRepoScope)(oAuthScopes)) {
-                return utils_1.Scope.REPO;
-            }
-            else {
-                core.setFailed(`Invalid scope ${scope}! err3`);
-                return '';
-            }
-        case utils_1.Scope.ORG:
-            if ((0, utils_1.oAuthHasOrgScope)(oAuthScopes)) {
-                return utils_1.Scope.ORG;
-            }
-            else {
-                core.setFailed('Invalid scope! PAT must have the following scope turned on: admin:org');
-                return '';
-            }
-        case utils_1.Scope.REPO:
-            if ((0, utils_1.oAuthHasRepoScope)(oAuthScopes)) {
-                return utils_1.Scope.REPO;
-            }
-            else {
-                core.setFailed('Invalid scope! PAT must have the following scope turned on: repo');
-                return '';
-            }
-        default:
-            core.setFailed(`Invalid scope ${scope}! err4`);
-            return '';
-    }
-}
-exports.returnCalculatedScope = returnCalculatedScope;
-
-
-/***/ }),
-
-/***/ 5710:
-/***/ (function(__unused_webpack_module, exports) {
-
-"use strict";
-
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -173,37 +85,108 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.scopeIsValid = exports.getOwnerAndRepo = exports.oAuthHasOrgScope = exports.oAuthHasRepoScope = exports.Scope = void 0;
-var Scope;
-(function (Scope) {
-    Scope["ORG"] = "organization";
-    Scope["REPO"] = "repository";
-    Scope["AUTO"] = "automatic";
-})(Scope = exports.Scope || (exports.Scope = {}));
+exports.returnCalculatedScope = exports.getRegistrationToken = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const utils_1 = __nccwpck_require__(5710);
+let oAuthScopes;
+const tokenInput = core.getInput('token', { required: true });
+const scopeInput = core.getInput('scope', { required: true });
+const octokit = github.getOctokit(tokenInput, {
+    log: console
+});
+function getRegistrationToken(owner, repo) {
+    return __awaiter(this, void 0, void 0, function* () {
+        oAuthScopes = yield getOAuthScopes();
+        const isOrgExists = yield isOrganizationExists(repo);
+        const calculatedScope = returnCalculatedScope(scopeInput, oAuthScopes, isOrgExists);
+        try {
+            const { data } = calculatedScope === utils_1.ScopeInput.ORG
+                ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
+                : yield octokit.rest.actions.createRegistrationTokenForRepo({ owner, repo });
+            return data;
+        }
+        catch (error) {
+            core.setFailed(`${error} err2`);
+            return { token: '', expires_at: '' };
+        }
+    });
+}
+exports.getRegistrationToken = getRegistrationToken;
+function getOAuthScopes() {
+    var _a, _b;
+    return __awaiter(this, void 0, void 0, function* () {
+        const { headers } = yield octokit.request('HEAD /');
+        return (_b = (_a = headers['x-oauth-scopes']) === null || _a === void 0 ? void 0 : _a.split(', ')) !== null && _b !== void 0 ? _b : [];
+    });
+}
+function isOrganizationExists(org) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield octokit.rest.orgs.get({ org });
+            return true;
+        }
+        catch (error) {
+            return false;
+        }
+    });
+}
+function returnCalculatedScope(scope, tokenScopes, isOrganization) {
+    if (!(0, utils_1.scopeInputIsValid)(scope)) {
+        core.setFailed(`Invalid scope (${scope}) err1!`);
+        return '';
+    }
+    if (isOrganization && (0, utils_1.oAuthHasOrgScope)(tokenScopes) && scope !== utils_1.ScopeInput.REPO) {
+        return utils_1.ScopeInput.ORG;
+    }
+    else if ((0, utils_1.oAuthHasRepoScope)(tokenScopes) && scope !== utils_1.ScopeInput.ORG) {
+        return utils_1.ScopeInput.REPO;
+    }
+    else {
+        core.setFailed(`Invalid scope ${scope}! err2`);
+        return '';
+    }
+}
+exports.returnCalculatedScope = returnCalculatedScope;
+
+
+/***/ }),
+
+/***/ 5710:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.scopeInputIsValid = exports.oAuthHasRepoScope = exports.oAuthHasOrgScope = exports.getOwnerAndRepo = exports.ScopeInput = void 0;
 var OAuthScope;
 (function (OAuthScope) {
     OAuthScope["ADMINORG"] = "admin:org";
     OAuthScope["REPO"] = "repo";
 })(OAuthScope || (OAuthScope = {}));
-function oAuthHasRepoScope(scopes) {
-    return scopes.includes(OAuthScope.REPO);
-}
-exports.oAuthHasRepoScope = oAuthHasRepoScope;
-function oAuthHasOrgScope(scopes) {
-    return scopes.includes(OAuthScope.ADMINORG);
-}
-exports.oAuthHasOrgScope = oAuthHasOrgScope;
+var ScopeInput;
+(function (ScopeInput) {
+    ScopeInput["ORG"] = "organization";
+    ScopeInput["REPO"] = "repository";
+    ScopeInput["AUTO"] = "automatic";
+})(ScopeInput = exports.ScopeInput || (exports.ScopeInput = {}));
 function getOwnerAndRepo(str) {
     const [owner, repo] = str.split('/', 2);
     return [owner, repo];
 }
 exports.getOwnerAndRepo = getOwnerAndRepo;
-function scopeIsValid(scope) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return Object.values(Scope).includes(scope);
-    });
+function oAuthHasOrgScope(scopes) {
+    return scopes.includes(OAuthScope.ADMINORG);
 }
-exports.scopeIsValid = scopeIsValid;
+exports.oAuthHasOrgScope = oAuthHasOrgScope;
+function oAuthHasRepoScope(scopes) {
+    return scopes.includes(OAuthScope.REPO);
+}
+exports.oAuthHasRepoScope = oAuthHasRepoScope;
+function scopeInputIsValid(scope) {
+    return Object.values(ScopeInput).includes(scope);
+}
+exports.scopeInputIsValid = scopeInputIsValid;
 
 
 /***/ }),
