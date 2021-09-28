@@ -9,8 +9,6 @@ enum OAuthScope {
   REPO = 'repo'
 }
 
-// let oAuthScopes: string[]
-
 export function oAuthHasRepoScope(scopes: string[]): boolean {
   return scopes.includes(OAuthScope.REPO)
 }

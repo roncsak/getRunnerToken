@@ -72,6 +72,7 @@ function getRegistrationToken() {
     return __awaiter(this, void 0, void 0, function* () {
         yield getOAuthScopes();
         const calculatedScope = (0, octokit_1.returnCalculatedScope)(scope, oAuthScopes);
+        octokit.log.debug(`Calculated scope is: ${calculatedScope}`);
         try {
             const { data } = calculatedScope === utils_1.Scope.ORG
                 ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
@@ -79,7 +80,7 @@ function getRegistrationToken() {
             return data;
         }
         catch (error) {
-            core.setFailed('Invalid scope! err2');
+            core.setFailed(`${error} err2`);
             return { token: '', expires_at: '' };
         }
     });
@@ -184,7 +185,6 @@ var OAuthScope;
     OAuthScope["ADMINORG"] = "admin:org";
     OAuthScope["REPO"] = "repo";
 })(OAuthScope || (OAuthScope = {}));
-// let oAuthScopes: string[]
 function oAuthHasRepoScope(scopes) {
     return scopes.includes(OAuthScope.REPO);
 }

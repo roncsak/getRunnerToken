@@ -34,6 +34,7 @@ async function getOAuthScopes(): Promise<void> {
 async function getRegistrationToken(): Promise<RegistrationResponse> {
   await getOAuthScopes()
   const calculatedScope = returnCalculatedScope(scope, oAuthScopes)
+  octokit.log.debug(`Calculated scope is: ${calculatedScope}`)
   try {
     const {data} =
       calculatedScope === Scope.ORG
@@ -41,7 +42,7 @@ async function getRegistrationToken(): Promise<RegistrationResponse> {
         : await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
     return data
   } catch (error) {
-    core.setFailed('Invalid scope! err2')
+    core.setFailed(`${error} err2`)
     return {token: '', expires_at: ''}
   }
 }
