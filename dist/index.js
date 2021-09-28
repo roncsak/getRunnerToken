@@ -71,7 +71,7 @@ function getOAuthScopes() {
 function getRegistrationToken() {
     return __awaiter(this, void 0, void 0, function* () {
         yield getOAuthScopes();
-        const calculatedScope = (0, octokit_1.returnCalculatedScope)(scope);
+        const calculatedScope = (0, octokit_1.returnCalculatedScope)(scope, oAuthScopes);
         try {
             const { data } = calculatedScope === utils_1.Scope.ORG
                 ? yield octokit.rest.actions.createRegistrationTokenForOrg({ org: owner })
@@ -117,8 +117,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.returnCalculatedScope = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const utils_1 = __nccwpck_require__(5710);
-let oAuthScopes;
-function returnCalculatedScope(scope) {
+// let oAuthScopes: string[]
+function returnCalculatedScope(scope, oAuthScopes) {
     switch (scope) {
         case 'automatic':
             if ((0, utils_1.oAuthHasOrgScope)(oAuthScopes)) {

@@ -102,7 +102,7 @@ test.each([
     jest.spyOn(utils, 'oAuthHasOrgScope').mockReturnValue(oAuthHasOrgScope)
     jest.spyOn(utils, 'oAuthHasRepoScope').mockReturnValue(oAuthHasRepoScope)
 
-    const isValid = returnCalculatedScope(testString)
+    const isValid = returnCalculatedScope(testString, ['mocked out'])
     expect(isValid).toBe(expected)
     expect(spy).toBeCalledTimes(setFailedCalled)
   }

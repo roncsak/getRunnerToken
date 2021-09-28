@@ -1,9 +1,9 @@
 import * as core from '@actions/core'
 import {Scope, oAuthHasOrgScope, oAuthHasRepoScope} from './utils'
 
-let oAuthScopes: string[]
+// let oAuthScopes: string[]
 
-export function returnCalculatedScope(scope: string): string {
+export function returnCalculatedScope(scope: string, oAuthScopes: string[]): string {
   switch (scope) {
     case 'automatic':
       if (oAuthHasOrgScope(oAuthScopes)) {

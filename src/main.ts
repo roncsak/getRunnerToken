@@ -33,7 +33,7 @@ async function getOAuthScopes(): Promise<void> {
 
 async function getRegistrationToken(): Promise<RegistrationResponse> {
   await getOAuthScopes()
-  const calculatedScope = returnCalculatedScope(scope)
+  const calculatedScope = returnCalculatedScope(scope, oAuthScopes)
   try {
     const {data} =
       calculatedScope === Scope.ORG
