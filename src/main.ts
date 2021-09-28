@@ -15,7 +15,7 @@ const octokit = github.getOctokit(token, {
 async function run(): Promise<void> {
   await getOAuthScopes()
   if (!scopeIsValid(scope)) {
-    core.setFailed('Invalid scope!')
+    core.setFailed(`Invalid scope (${scope}) err1!`)
   }
   const response: RegistrationResponse = await getRegistrationToken()
   core.setOutput('token', response.token)
@@ -41,7 +41,7 @@ async function getRegistrationToken(): Promise<RegistrationResponse> {
         : await octokit.rest.actions.createRegistrationTokenForRepo({owner, repo})
     return data
   } catch (error) {
-    core.setFailed('Invalid scope!')
+    core.setFailed('Invalid scope! err2')
     return {token: '', expires_at: ''}
   }
 }

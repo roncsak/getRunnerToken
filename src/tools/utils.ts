@@ -1,5 +1,3 @@
-import * as core from '@actions/core'
-
 export enum Scope {
   ORG = 'organization',
   REPO = 'repository',
@@ -28,9 +26,4 @@ export function getOwnerAndRepo(str: string): [string, string] {
 
 export async function scopeIsValid(scope: string): Promise<boolean> {
   return Object.values(Scope).includes(scope as Scope)
-}
-
-export function someFn(): string {
-  core.setFailed('invalid scope')
-  return ''
 }

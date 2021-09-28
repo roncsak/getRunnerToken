@@ -11,7 +11,7 @@ export function returnCalculatedScope(scope: string, oAuthScopes: string[]): str
       } else if (oAuthHasRepoScope(oAuthScopes)) {
         return Scope.REPO
       } else {
-        core.setFailed('Invalid scope!')
+        core.setFailed(`Invalid scope ${scope}! err3`)
         return ''
       }
     case Scope.ORG:
@@ -30,7 +30,7 @@ export function returnCalculatedScope(scope: string, oAuthScopes: string[]): str
         return ''
       }
     default:
-      core.setFailed('Invalid scope!')
+      core.setFailed(`Invalid scope ${scope}! err4`)
       return ''
   }
 }
