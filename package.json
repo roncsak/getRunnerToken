@@ -34,7 +34,7 @@
     "@octokit/webhooks-definitions": "^3.67.3"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.15",
+    "@types/jest": "^27.0.2",
     "@types/node": "^16.10.1",
     "@types/xml2js": "^0.4.8",
     "@typescript-eslint/parser": "^4.32.0",
