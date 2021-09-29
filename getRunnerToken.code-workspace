@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true,
+		"files.insertFinalNewline": true,
+		"telemetry.enableCrashReporter": false,
+		"editor.rulers": [
+			110
+		],
+		"extensions": {
+			"recommendations": []
+		}
+	}
+}
