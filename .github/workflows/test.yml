@@ -19,10 +19,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
-        id: getToken
+
+      - name: Get token for self-hosted runner registration
+        uses: ./
+        id  : runnerRegistration
         with:
           token: ${{ secrets.PAT }}
           # scope: "organization"
-      - run: |
-          echo "The token is: ${{ steps.getToken.outputs.token }} , expires at ${{ steps.getToken.outputs.expires_at }}"
+
+      - name: Use the token in subsequent steps
+        run : |
+          echo ${{ steps.runnerRegistration.outputs.token }}
+          echo "Your token expire at: ${{ steps.runnerRegistration.outputs.expires_at }}"
