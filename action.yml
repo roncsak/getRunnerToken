@@ -8,14 +8,15 @@ inputs:
   scope:
     required: true
     description: 'The scope of the registration token'
-    default: 'repository'
+    default: 'automatic'
   token:
     required: true
     description: 'GitHub or PAT token'
-    default: ${{ github.token }}
 outputs:
   token:
     description: "Registration token for self-hosted runner"
+  expires_at:
+    description: "Expiration time of the token"
 
 runs:
   using: 'node12'
