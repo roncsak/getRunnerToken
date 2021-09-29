@@ -20,8 +20,9 @@ It is possible to create self-hosted runners for a specific repository or an org
 every repository of the given organization can utilize the runner.
 This action acquires a registration token based on the scope of your Personal Access Token (PAT). If your PAT
 have scopes of both `repo` and `admin:org`, this action will provide a registration token that can be used for
-organization level registration. You have to place your PAT to GitHub Secrets of your repository. In case you
-want to specify the scope for some reason, you can do it by providing the `scope` in the action.
+organization level registration. However, if the repository does not belongs to an organization it will never
+acquire an organization level token. You have to place your PAT to GitHub Secrets of your repository. In case
+you want to specify the scope for some reason, you can do it by providing the `scope` in the action.
 
 (One could ask the question: Is it possible to use this with `secrets.GITHUB_TOKEN`? Unfortunately it is not
 possible! `GITHUB_TOKEN` has repository level scope, so it can't be used to create organization level runner
