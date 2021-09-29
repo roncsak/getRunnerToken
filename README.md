@@ -58,5 +58,5 @@ The runner registration token (in the scope provided in input paramaters).
 - name: Use the token in subsequent steps
   run : |
     echo ${{ steps.runnerRegistration.outputs.token }}
-    echo "Your token expire at: ${{ steps.runnerRegistration.outputs.expires_at }}"
+    echo "Your token expires at: ${{ steps.runnerRegistration.outputs.expires_at }}"
 ```
