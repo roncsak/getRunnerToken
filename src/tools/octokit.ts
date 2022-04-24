@@ -15,7 +15,7 @@ export async function getRegistrationToken(
   repo: string
 ): Promise<RegistrationResponse> {
   oAuthScopes = await getOAuthScopes()
-  const isOrgExists = await isOrganizationExists(repo)
+  const isOrgExists = await isOrganizationExists(owner)
   const calculatedScope = returnCalculatedScope(scopeInput, oAuthScopes, isOrgExists)
   try {
     const {data} =
