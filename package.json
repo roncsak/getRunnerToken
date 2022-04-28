@@ -1,6 +1,6 @@
 {
   "name": "typescript-action",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "Get GitHub Action registration token for self-hosted runners",
   "main": "lib/main.js",
