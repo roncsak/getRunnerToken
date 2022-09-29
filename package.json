@@ -29,7 +29,7 @@
   "author": "roncsak",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.7.0",
+    "@actions/core": "^1.10.0",
     "@actions/github": "^5.0.1",
     "@octokit/webhooks-definitions": "^3.67.3"
   },
